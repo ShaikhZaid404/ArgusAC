@@ -1,0 +1,36 @@
+name: ArgusAC
+version: "${version}"
+main: dev.argus.ArgusPlugin
+api-version: "1.21"
+folia-supported: true
+description: "The 100-Eyed All-Seeing Guardian for Modern Minecraft Servers."
+authors: [Shaikh Zaid]
+website: "https://modrinth.com/plugin/argusac"
+
+softdepend:
+  - packetevents
+  - PlaceholderAPI
+
+commands:
+  argus:
+    description: "Argus Anti Cheat Master Administrative Command"
+    aliases: [argusac, ac, guardian]
+    permission: argus.admin
+    usage: "/argus <panel|guide|reload|freeze|unfreeze|alts|efficiency|bypass>"
+
+permissions:
+  argus.admin:
+    description: "Full administrative access to ArgusAC"
+    default: op
+  argus.mod:
+    description: "Access to inspection, freeze, and player lookup"
+    default: op
+  argus.alerts:
+    description: "Receive real-time cheat violation alerts"
+    default: op
+  argus.bypass:
+    description: "Bypass all anti-cheat checks"
+    default: false
+  argus.alts.bypass:
+    description: "Exempt from alt-account connection enforcement"
+    default: false

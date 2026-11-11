@@ -1,0 +1,50 @@
+# ==============================================================================
+#                  ARGUS ANTI CHEAT (ArgusAC) - DISCORD CONFIG
+#          Interactive Remote Bot, Action Buttons, Slash Commands & Webhook
+# ==============================================================================
+
+# Enable Discord integration
+enabled: true
+
+# Mode: 'BOT' (Full JDA bot with buttons & slash commands) or 'WEBHOOK' (Zero-RAM alerts only)
+mode: "BOT"
+
+# Lightweight webhook URL (Used only when mode is 'WEBHOOK')
+webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL"
+
+# Full Bot Settings (Used when mode is 'BOT')
+bot:
+  # Channels & Roles (Paste Discord snowflake IDs)
+  channels:
+    alerts: "000000000000000000"       # Real-time cheat violation alerts
+    logs: "000000000000000000"         # Administrative and punishment logs
+    alt-audits: "000000000000000000"   # Player IP & alt-account activity reports
+    daily-digest: "000000000000000000" # Daily automated threat analytics briefing
+    ticket-category: "000000000000000000" # Category where screen-share verification tickets are generated
+    
+  roles:
+    staff-admin: "000000000000000000"  # Role allowed to use slash commands and action buttons
+
+  # Embed Aesthetics
+  embeds:
+    color-alert: "#E74C3C"             # Red for cheat alerts
+    color-info: "#3498DB"              # Blue for lookups and stats
+    color-success: "#2ECC71"           # Green for resolved/verified cases
+    footer-text: "ArgusAC Enterprise • All-Seeing Guardian"
+
+  # Anti-Spam Smart Batching
+  # When true: Edits the same alert message dynamically as a player's VL rises, preventing channel spam
+  anti-spam-batching: true
+
+  # Interactive Message Buttons on Alert Embeds
+  buttons:
+    enable-ban: true                   # Adds 🔴 [Ban] button
+    enable-kick: true                  # Adds 🟡 [Kick] button
+    enable-freeze: true                # Adds ❄️ [Freeze] button
+    enable-lookup: true                # Adds 📋 [Lookup] button
+    enable-dismiss: true               # Adds ❌ [Dismiss] button
+
+  # Automated Daily Threat Digest
+  daily-digest:
+    enabled: true
+    schedule-time-utc: "00:00"         # Runs every midnight UTC

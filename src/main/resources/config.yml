@@ -1,0 +1,219 @@
+# ==============================================================================
+#                  ARGUS ANTI CHEAT (ArgusAC) - CONFIGURATION
+#             Enterprise-Grade Paper / Purpur / Folia Anti-Cheat
+# ==============================================================================
+
+config-version: 1
+
+# ------------------------------------------------------------------------------
+# 1. GENERAL SETTINGS & THREADING
+# ------------------------------------------------------------------------------
+general:
+  prefix: "&8[&b&lARGUS&8]&r"
+  debug: false
+  exempt-ops: false                   # When true, server operators bypass all checks
+  folia-support: true                 # Native Folia regionised multithreading support
+  tps-protection:
+    enabled: true                     # Dynamically scale thresholds during server lag
+    min-tps: 18.5                     # Below this TPS, checks automatically relax
+    max-ping: 350                     # Ping above which compensation buffer increases
+
+# ------------------------------------------------------------------------------
+# 2. AI INTELLIGENCE ENGINE (Multi-Provider Dynamic Discovery)
+# ------------------------------------------------------------------------------
+ai:
+  enabled: true
+  # 'auto': Dynamically queries available provider API keys, picks highest token & fastest model
+  # Explicit example: 'groq/llama-3.3-70b-versatile' or 'gemini/gemini-1.5-flash'
+  default-model: "auto"
+  
+  # How often Argus re-queries /v1/models to update model roster (in hours)
+  model-discovery-interval-hours: 24
+  
+  # Efficiency profile: 'LOW', 'MEDIUM', 'HIGH', 'EXTRA_HIGH'
+  # Loaded into RAM from argusai-prompts/ on startup
+  efficiency-profile: "HIGH"
+  
+  # Automatic failover routing order when primary hits HTTP 429 rate limit
+  provider-priority:
+    - "groq"
+    - "openrouter"
+    - "gemini"
+    
+  # When all AI keys fail or network is down, gracefully fallback to internal math checks
+  fallback-to-pure-math: true
+  
+  # Suspicion threshold required to invoke AI verification (avoids burning tokens on trivial events)
+  trigger-suspicion-vl: 10
+
+# ------------------------------------------------------------------------------
+# 3. DATABASE CONFIGURATION (SQLite by default, MySQL supported)
+# ------------------------------------------------------------------------------
+database:
+  type: sqlite                        # 'sqlite' or 'mysql'
+  sqlite:
+    file: "argus.db"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "argus_ac"
+    username: "root"
+    # Password must be set in secrets.yml
+    pool:
+      max-connections: 10
+      min-idle: 2
+      max-lifetime-ms: 1800000
+
+# ------------------------------------------------------------------------------
+# 4. PLAYER IP & ALT-ACCOUNT POLICY
+# ------------------------------------------------------------------------------
+alts:
+  # When false: Only the FIRST account to ever join from this IP (Primary) is allowed.
+  # Secondary accounts (e.g. zaid2) are punished according to 'punishment-action'.
+  # Primary account (zaid1) is NEVER punished.
+  allowed: false
+  
+  # Maximum allowed alt accounts per IP when 'allowed' is set to true
+  max-alts-per-ip: 3
+  
+  # Action to take against secondary accounts (e.g. zaid2) attempting to join:
+  # Options:
+  #   - 'KICK'     : Instantly disconnects the alt account with disconnect-message.
+  #   - 'TEMPBAN'  : Bans the alt account for the duration configured below.
+  #   - 'BAN'      : Permanently bans the alt account.
+  #   - 'COMMAND'  : Executes a custom server command.
+  punishment-action: "KICK"
+  
+  # Duration for 'TEMPBAN' action (e.g. "1d", "7d", "14d", "30d")
+  tempban-duration: "7d"
+  
+  # Custom command to execute if punishment-action is set to 'COMMAND'
+  custom-command: "tempban {alt_player} 7d Alt Accounts Prohibited | ArgusAC"
+  
+  # Disconnect / Ban message displayed to the secondary account
+  disconnect-message: "&c&lArgusAC &8» &7Alt accounts are not permitted on this server!\n&ePlease join using your primary registered account: &a{primary_account}"
+  
+  # When true, sends an in-game notification to the primary player if they are currently online
+  notify-primary-in-game: true
+  primary-notify-message: "&e&lArgusAC &8» &7Notice: A secondary account (&c{alt_player}&7) attempted to connect from your IP and was rejected."
+  
+  # Send an audit summary to Discord channel when an alt account is detected/blocked
+  discord-audit: true
+
+# ------------------------------------------------------------------------------
+# 5. VIOLATION & MITIGATION SYSTEM
+# ------------------------------------------------------------------------------
+violations:
+  decay-factor: 0.95                  # Exponential decay factor for violation levels
+  decay-interval-seconds: 10          # Seconds between decay cycles
+
+mitigation:
+  silent-nerf:
+    enabled: true                     # Neutralize malicious advantages without instant ban
+    cancel-hits: true                 # Drop attack registrations on flagged KillAura
+    clamp-reach: 2.2                  # Clamp attack distance from 3.0 to 2.2 blocks on suspicion
+    cancel-scaffold-blocks: true      # Cancel illegal block placements in real-time
+    
+  setback:
+    mode: "SMOOTH"                    # 'SMOOTH' (predictive vector reconcile) or 'INSTANT' (snap back)
+    notify-player: false              # Whether to notify players of movement corrections
+
+# ------------------------------------------------------------------------------
+# 6. FREEZE & SCREEN-SHARE VERIFICATION
+# ------------------------------------------------------------------------------
+freeze:
+  code-expiry-seconds: 300            # Time (in seconds) the player has to run /verify on Discord
+  auto-ban-on-disconnect: true        # Automatically ban if the suspect logs out while frozen
+  auto-ban-reason: "[Argus] Logging out while frozen / Screen-share evasion"
+
+# ------------------------------------------------------------------------------
+# 7. HONEYPOT TRAP CHECKS
+# ------------------------------------------------------------------------------
+honeypot:
+  aura-bot:
+    enabled: true                     # Spawn packet-level invisible entity around suspected aura users
+    trigger-suspicion-vl: 12
+    ticks-to-live: 40                 # 2 seconds lifetime
+    instant-ban: true                 # Hitting this invisible entity guarantees instant ban
+
+# ------------------------------------------------------------------------------
+# 8. ANTI-BOT & NETWORK SHIELD
+# ------------------------------------------------------------------------------
+antibot:
+  enabled: true
+  security-level: "NORMAL"            # 'LOW', 'NORMAL', 'HIGH', 'LOCKDOWN'
+  attack-threshold-joins-per-sec: 15
+  lockdown-duration-seconds: 180
+  name-pattern-detection: true        # Blocks generic bot names (e.g. Bot_7821)
+  cache-ip-hours: 24                  # Caches IP lookup results to conserve API calls
+
+# ------------------------------------------------------------------------------
+# 9. CHECKS CONFIGURATION (Modular Watchers)
+# ------------------------------------------------------------------------------
+checks:
+  combat:
+    killaura:
+      enabled: true
+      gcd-angle-check: true           # Detects client mouse sensitivity GCD anomalies
+      max-angle-change: 45.0
+      vl-threshold: 20
+      punishment: "ban"
+    reach:
+      enabled: true
+      max-reach-blocks: 3.01
+      lag-compensation: true
+      vl-threshold: 15
+      punishment: "warn"
+    autoclicker:
+      enabled: true
+      max-cps: 16
+      entropy-analysis: true          # Statistical Gaussian click cadence analysis
+      vl-threshold: 25
+      punishment: "kick"
+    velocity:
+      enabled: true
+      min-knockback-ratio: 99.0       # Anti-KB check
+      vl-threshold: 15
+      punishment: "setback"
+
+  movement:
+    fly:
+      enabled: true
+      prediction-model: true          # Accurate physical kinematics simulation
+      vl-threshold: 10
+      punishment: "setback"
+    speed:
+      enabled: true
+      vl-threshold: 12
+      punishment: "setback"
+    timer:
+      enabled: true
+      max-clock-drift-ms: 35
+      vl-threshold: 20
+      punishment: "kick"
+    scaffold:
+      enabled: true
+      pitch-snap-check: true
+      backward-sprint: true
+      vl-threshold: 12
+      punishment: "setback"
+
+  world:
+    fastbreak:
+      enabled: true
+      vl-threshold: 10
+      punishment: "setback"
+    fastplace:
+      enabled: true
+      delay-ms: 50
+      vl-threshold: 8
+      punishment: "setback"
+
+  packet:
+    badpackets:
+      enabled: true
+      vl-threshold: 5
+      punishment: "kick"
+    netty-crash-shield:
+      enabled: true                   # Drops crash packets (illegal pitch/yaw out of range)
+      punishment: "kick"

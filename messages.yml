@@ -1,0 +1,64 @@
+# ==============================================================================
+#                  ARGUS ANTI CHEAT (ArgusAC) - MESSAGES
+#             Fully Customizable In-Game Chat, Titles & Formats
+# ==============================================================================
+
+prefix: "&8[&b&lARGUS&8]&r"
+
+# ------------------------------------------------------------------------------
+# 1. STAFF ALERTS & ACTION BAR
+# ------------------------------------------------------------------------------
+alerts:
+  # Clickable actions: [TP] -> /tp {player}, [INSPECT] -> /argus inspect {player}, [FREEZE] -> /argus freeze {player}, [BAN] -> /ban {player}
+  chat-format: "&8[&bArgus&8] &c{player} &7flagged &e{check} &8(&f{detail}&8) &7[VL: &c{vl}&7] &8| &a<click:run_command:/tp {player}>[TP]</click> &e<click:run_command:/argus inspect {player}>[INSPECT]</click> &b<click:run_command:/argus freeze {player}>[FREEZE]</click> &c<click:suggest_command:/ban {player} Hacking | ArgusAC>[BAN]</click>"
+  action-bar:
+    enabled: true
+    format: "&c&lARGUS &8» &f{player} &7failed &e{check} &c(VL: {vl})"
+
+# ------------------------------------------------------------------------------
+# 2. OPERATOR STARTUP & JOIN NOTIFICATIONS
+# ------------------------------------------------------------------------------
+op-banner:
+  complete:
+    - "&8&m--------------------------------------------------"
+    - "&b&lArgusAC &7v1.0.0 &8» &aAll Systems Armed & Operational"
+    - "&7Active AI Engine: &e{ai_provider} &8(&f{ai_model}&8) &7[Health: &a{ai_status}&7]"
+    - "&7Efficiency Profile: &b{efficiency} &8| &7Latency: &f{ai_ping}ms"
+    - "&7Discord Integration: &a{discord_status} &8| &7Fallback: &aARMED (Pure Math)"
+    - "&8&m--------------------------------------------------"
+  incomplete:
+    - "&8&m--------------------------------------------------"
+    - "&b&lArgusAC &7v1.0.0 &8» &eNotice: Initial Configuration Pending"
+    - "&c⚠ Missing configurations detected:"
+    - "{missing_items}"
+    - "&7Type &b/argus guide &7or <click:run_command:/argus guide>&e&n[CLICK HERE]</click> &7to open the interactive setup book."
+    - "&8&m--------------------------------------------------"
+
+# ------------------------------------------------------------------------------
+# 3. FREEZE & SCREEN-SHARE MESSAGES
+# ------------------------------------------------------------------------------
+freeze:
+  title: "&c&lFROZEN BY STAFF"
+  subtitle: "&eDo NOT disconnect! Join Discord & run /verify {code}"
+  chat-instructions:
+    - "&c&m--------------------------------------------------"
+    - "&c&lYOU HAVE BEEN FROZEN FOR A SUSPECTED SCREEN-SHARE CHECK"
+    - "&7Do not close your Minecraft client or log out."
+    - "&71. Join our Discord server: &b{discord_invite}"
+    - "&72. Run the slash command: &e/verify {code}"
+    - "&7You have &c{expiry_seconds} seconds &7to verify or you will be banned."
+    - "&c&m--------------------------------------------------"
+  unfrozen: "&a&lArgusAC &8» &7You have been unfrozen by staff. Thank you for your cooperation."
+  already-frozen: "&c&lArgusAC &8» &7Player is already frozen!"
+  not-frozen: "&c&lArgusAC &8» &7Player is not currently frozen."
+
+# ------------------------------------------------------------------------------
+# 4. COMMAND FEEDBACK
+# ------------------------------------------------------------------------------
+commands:
+  no-permission: "&c&lArgusAC &8» &7You do not have permission to execute this command."
+  player-not-found: "&c&lArgusAC &8» &7Target player was not found online."
+  reload-success: "&a&lArgusAC &8» &7Reloaded in &f{reload_time_ms}ms&7! (Checks: &a{active_checks}&7, AI: &e{ai_provider}/{ai_model}&7, Discord: &aSynced&7)"
+  efficiency-changed: "&a&lArgusAC &8» &7AI Efficiency switched to &b{new_efficiency}&7. System prompt hot-reloaded into RAM."
+  bypass-granted: "&a&lArgusAC &8» &7Granted temporary bypass to &f{player} &7for &e{duration}&7."
+  bypass-expired: "&e&lArgusAC &8» &7Temporary bypass for &f{player} &7has expired. Protection resumed."
