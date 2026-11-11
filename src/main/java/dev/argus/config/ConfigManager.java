@@ -40,7 +40,17 @@ public final class ConfigManager {
     private FileConfiguration loadYaml(String fileName) {
         File file = new File(plugin.getDataFolder(), fileName);
         if (!file.exists()) {
-            plugin.saveResource(fileName, false);
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
+            if (plugin.getResource(fileName) != null) {
+                plugin.saveResource(fileName, false);
+            } else {
+                try {
+                    file.createNewFile();
+                } catch (Exception ignored) {
+                }
+            }
         }
         return YamlConfiguration.loadConfiguration(file);
     }

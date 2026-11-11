@@ -39,7 +39,10 @@ public final class PromptManager {
             String fileName = tier + "-system.md";
             File file = new File(promptsDir, fileName);
             if (!file.exists()) {
-                plugin.saveResource("argusai-prompts/" + fileName, false);
+                String resPath = "argusai-prompts/" + fileName;
+                if (plugin.getResource(resPath) != null) {
+                    plugin.saveResource(resPath, false);
+                }
             }
 
             try {
