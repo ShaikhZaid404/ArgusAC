@@ -1,12 +1,21 @@
 package dev.argus;
 
+import dev.argus.ai.AIEngine;
+import dev.argus.alts.AltManager;
+import dev.argus.checks.CheckManager;
+import dev.argus.commands.ArgusCommand;
+import dev.argus.config.ConfigManager;
+import dev.argus.config.PromptManager;
+import dev.argus.freeze.FreezeManager;
+import dev.argus.listeners.CheckListener;
+import dev.argus.listeners.PlayerConnectionListener;
+import dev.argus.scheduler.ArgusScheduler;
+import dev.argus.storage.DatabaseManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 /**
@@ -18,33 +27,77 @@ public final class ArgusPlugin extends JavaPlugin {
     private static ArgusPlugin instance;
     private boolean folia;
 
+    private ArgusScheduler scheduler;
+    private PromptManager promptManager;
+    private ConfigManager configManager;
+    private DatabaseManager databaseManager;
+    private AltManager altManager;
+    private AIEngine aiEngine;
+    private CheckManager checkManager;
+    private FreezeManager freezeManager;
+
     @Override
     public void onEnable() {
         instance = this;
         Logger logger = getLogger();
 
-        // Detect Folia vs Paper runtime
+        // 1. Detect Folia vs Paper runtime
         this.folia = detectFolia();
 
-        // Print large ASCII startup banner to console
+        // 2. Initialize Scheduler Abstraction
+        this.scheduler = new ArgusScheduler(this);
+
+        // 3. Initialize Memory Prompt & Config Managers
+        this.promptManager = new PromptManager(this);
+        this.promptManager.loadPrompts();
+
+        this.configManager = new ConfigManager(this);
+        this.configManager.reloadAll();
+
+        // 4. Initialize SQLite Relational Database & Alt Manager
+        this.databaseManager = new DatabaseManager(this);
+        this.databaseManager.initialize();
+        this.altManager = new AltManager(this);
+
+        // 5. Initialize Multi-Provider AI Engine & Fallback Router
+        this.aiEngine = new AIEngine(this);
+        this.aiEngine.start();
+
+        // 6. Initialize Detection Checks & Freeze Manager
+        this.checkManager = new CheckManager(this);
+        this.freezeManager = new FreezeManager(this);
+
+        // 7. Register Event Listeners
+        PluginManager pm = Bukkit.getPluginManager();
+        pm.registerEvents(new PlayerConnectionListener(this), this);
+        pm.registerEvents(new CheckListener(this), this);
+
+        // 8. Register Commands & Tab Completers
+        ArgusCommand masterCommand = new ArgusCommand(this);
+        if (getCommand("argus") != null) {
+            getCommand("argus").setExecutor(masterCommand);
+            getCommand("argus").setTabCompleter(masterCommand);
+        }
+
+        // 9. Print Large Console Startup Banner
         printStartupBanner();
 
-        // Initialize and save default configurations
-        saveDefaultConfigs();
-
-        logger.info("[ArgusAC] Initialized successfully on " + (folia ? "Folia (Regionised)" : "Paper/Purpur") + "!");
+        logger.info("[ArgusAC] All watchers, AI engines, and database pools armed successfully on "
+                + (folia ? "Folia (Regionised)" : "Paper/Purpur") + "!");
     }
 
     @Override
     public void onDisable() {
         Logger logger = getLogger();
-        logger.info("[ArgusAC] Safely unregistering watchers and closing database connections...");
+        logger.info("[ArgusAC] Safely shutting down watchers and closing connection pools...");
+
+        if (databaseManager != null) {
+            databaseManager.close();
+        }
+
         instance = null;
     }
 
-    /**
-     * Prints the glorious ArgusAC ASCII banner in server console upon startup.
-     */
     private void printStartupBanner() {
         String[] banner = {
             "  ___                           _    ____ ",
@@ -60,6 +113,7 @@ public final class ArgusPlugin extends JavaPlugin {
             " > Version: " + getDescription().getVersion() + " (Java 21)",
             " > AI Engine: Dynamic Discovery (Groq / OpenRouter / Gemini)",
             " > Pure Kinematic Fallback: Armed & Ready",
+            " > Alt Protection: SQLite Relational Primary Ledger",
             "--------------------------------------------------"
         };
 
@@ -68,37 +122,6 @@ public final class ArgusPlugin extends JavaPlugin {
         }
     }
 
-    /**
-     * Ensures default configuration files exist in plugin directory.
-     */
-    private void saveDefaultConfigs() {
-        saveDefaultConfig();
-        saveResourceIfNotExists("messages.yml");
-        saveResourceIfNotExists("discord.yml");
-        saveResourceIfNotExists("secrets.yml");
-
-        // Save default efficiency prompts
-        String[] prompts = {
-            "argusai-prompts/low-system.md",
-            "argusai-prompts/medium-system.md",
-            "argusai-prompts/high-system.md",
-            "argusai-prompts/extra-high-system.md"
-        };
-        for (String prompt : prompts) {
-            saveResourceIfNotExists(prompt);
-        }
-    }
-
-    private void saveResourceIfNotExists(String path) {
-        File file = new File(getDataFolder(), path);
-        if (!file.exists()) {
-            saveResource(path, false);
-        }
-    }
-
-    /**
-     * Checks if current server engine is Folia.
-     */
     private boolean detectFolia() {
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
@@ -108,21 +131,43 @@ public final class ArgusPlugin extends JavaPlugin {
         }
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("argus")) {
-            sender.sendMessage(ChatColor.AQUA + "[ArgusAC] " + ChatColor.GRAY + "v" + getDescription().getVersion() + 
-                    " is active. Use " + ChatColor.YELLOW + "/argus guide" + ChatColor.GRAY + " for the interactive setup book.");
-            return true;
-        }
-        return false;
-    }
-
     public static ArgusPlugin getInstance() {
         return instance;
     }
 
     public boolean isFolia() {
         return folia;
+    }
+
+    public ArgusScheduler getScheduler() {
+        return scheduler;
+    }
+
+    public PromptManager getPromptManager() {
+        return promptManager;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public AltManager getAltManager() {
+        return altManager;
+    }
+
+    public AIEngine getAiEngine() {
+        return aiEngine;
+    }
+
+    public CheckManager getCheckManager() {
+        return checkManager;
+    }
+
+    public FreezeManager getFreezeManager() {
+        return freezeManager;
     }
 }
