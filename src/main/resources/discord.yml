@@ -14,6 +14,10 @@ webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL"
 
 # Full Bot Settings (Used when mode is 'BOT')
 bot:
+  # Discord Server (Guild) ID - Required for INSTANT (0-second) Slash Command registration!
+  # If empty, commands register globally which takes up to 1 hour on Discord.
+  guild-id: "000000000000000000"
+
   # Channels & Roles (Paste Discord snowflake IDs)
   channels:
     alerts: "000000000000000000"       # Real-time cheat violation alerts

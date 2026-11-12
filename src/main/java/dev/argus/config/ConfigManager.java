@@ -71,21 +71,60 @@ public final class ConfigManager {
         return secrets;
     }
 
-    // Helper getters for Secrets
+    // Helper getters for Secrets & Integration
     public String getGroqApiKey() {
-        return secrets.getString("ai.groq-api-key", "");
+        String key = secrets.getString("ai.groq-api-key", "");
+        if (key.isBlank()) {
+            key = secrets.getString("ai.groq.api-key", "");
+        }
+        if (key.isBlank()) {
+            key = secrets.getString("ai.groq", "");
+        }
+        return key.trim();
     }
 
     public String getOpenRouterApiKey() {
-        return secrets.getString("ai.openrouter-api-key", "");
+        String key = secrets.getString("ai.openrouter-api-key", "");
+        if (key.isBlank()) {
+            key = secrets.getString("ai.openrouter.api-key", "");
+        }
+        return key.trim();
     }
 
     public String getGeminiApiKey() {
-        return secrets.getString("ai.gemini-api-key", "");
+        String key = secrets.getString("ai.gemini-api-key", "");
+        if (key.isBlank()) {
+            key = secrets.getString("ai.gemini.api-key", "");
+        }
+        return key.trim();
     }
 
     public String getDiscordBotToken() {
-        return secrets.getString("discord.bot-token", "");
+        String token = secrets.getString("discord.bot-token", "");
+        if (token.isBlank()) {
+            token = secrets.getString("discord.bot_token", "");
+        }
+        if (token.isBlank()) {
+            token = secrets.getString("discord.token", "");
+        }
+        if (token.isBlank()) {
+            token = discord.getString("bot.token", "");
+        }
+        return token.trim();
+    }
+
+    public String getDiscordGuildId() {
+        String guildId = discord.getString("bot.guild-id", "");
+        if (guildId.isBlank() || guildId.equals("000000000000000000")) {
+            guildId = discord.getString("bot.guild_id", "");
+        }
+        if (guildId.isBlank() || guildId.equals("000000000000000000")) {
+            guildId = secrets.getString("discord.guild-id", "");
+        }
+        if (guildId.isBlank() || guildId.equals("000000000000000000")) {
+            guildId = secrets.getString("discord.guild_id", "");
+        }
+        return (guildId != null && !guildId.equals("000000000000000000")) ? guildId.trim() : "";
     }
 
     public boolean hasAnyAIKey() {

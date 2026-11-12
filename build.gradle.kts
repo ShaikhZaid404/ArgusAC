@@ -54,6 +54,9 @@ tasks.shadowJar {
     // Relocate shaded dependencies (NEVER relocate org.sqlite as JNI native bindings break)
     relocate("com.zaxxer.hikari", "dev.argus.libs.hikari")
     relocate("net.dv8tion.jda", "dev.argus.libs.jda")
+    relocate("okhttp3", "dev.argus.libs.okhttp3")
+    relocate("okio", "dev.argus.libs.okio")
+    relocate("com.fasterxml.jackson", "dev.argus.libs.jackson")
 }
 
 tasks.build {

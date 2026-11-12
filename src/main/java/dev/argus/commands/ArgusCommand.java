@@ -47,6 +47,9 @@ public final class ArgusCommand implements CommandExecutor, TabCompleter {
                 plugin.getConfigManager().reloadAll();
                 plugin.getPromptManager().loadPrompts();
                 plugin.getCheckManager().reloadChecks();
+                if (plugin.getDiscordManager() != null) {
+                    plugin.getDiscordManager().reload();
+                }
                 long elapsed = System.currentTimeMillis() - start;
 
                 sender.sendMessage(ChatColor.GREEN + "[ArgusAC] Zero-downtime reload complete in " + elapsed + "ms! (Active Checks: "

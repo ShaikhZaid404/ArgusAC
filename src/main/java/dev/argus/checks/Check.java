@@ -62,6 +62,11 @@ public abstract class Check {
             }
         }
 
+        // Broadcast rich interactive alert to Discord staff channel
+        if (plugin.getDiscordManager() != null) {
+            plugin.getDiscordManager().sendAlert(player.getName(), name, detail, currentVl, category.name());
+        }
+
         // Check if punishment threshold reached
         if (currentVl >= vlThreshold) {
             executePunishment(player, currentVl);

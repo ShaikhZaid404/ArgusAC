@@ -6,6 +6,7 @@ import dev.argus.checks.CheckManager;
 import dev.argus.commands.ArgusCommand;
 import dev.argus.config.ConfigManager;
 import dev.argus.config.PromptManager;
+import dev.argus.discord.DiscordManager;
 import dev.argus.freeze.FreezeManager;
 import dev.argus.listeners.CheckListener;
 import dev.argus.listeners.PlayerConnectionListener;
@@ -35,6 +36,7 @@ public final class ArgusPlugin extends JavaPlugin {
     private AIEngine aiEngine;
     private CheckManager checkManager;
     private FreezeManager freezeManager;
+    private DiscordManager discordManager;
 
     @Override
     public void onEnable() {
@@ -79,7 +81,11 @@ public final class ArgusPlugin extends JavaPlugin {
             getCommand("argus").setTabCompleter(masterCommand);
         }
 
-        // 9. Print Large Console Startup Banner
+        // 9. Initialize Enterprise Discord Integration
+        this.discordManager = new DiscordManager(this);
+        this.discordManager.start();
+
+        // 10. Print Large Console Startup Banner
         printStartupBanner();
 
         logger.info("[ArgusAC] All watchers, AI engines, and database pools armed successfully on "
@@ -90,6 +96,10 @@ public final class ArgusPlugin extends JavaPlugin {
     public void onDisable() {
         Logger logger = getLogger();
         logger.info("[ArgusAC] Safely shutting down watchers and closing connection pools...");
+
+        if (discordManager != null) {
+            discordManager.shutdown();
+        }
 
         if (databaseManager != null) {
             databaseManager.close();
@@ -169,5 +179,9 @@ public final class ArgusPlugin extends JavaPlugin {
 
     public FreezeManager getFreezeManager() {
         return freezeManager;
+    }
+
+    public DiscordManager getDiscordManager() {
+        return discordManager;
     }
 }
