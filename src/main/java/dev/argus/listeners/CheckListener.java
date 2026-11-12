@@ -71,6 +71,13 @@ public final class CheckListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerAnimation(org.bukkit.event.player.PlayerAnimationEvent event) {
+        if (event.getAnimationType() == org.bukkit.event.player.PlayerAnimationType.ARM_SWING) {
+            plugin.getCheckManager().getAutoClickerCheck().processClick(event.getPlayer());
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();

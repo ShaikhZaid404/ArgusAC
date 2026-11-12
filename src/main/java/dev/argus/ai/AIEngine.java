@@ -157,11 +157,15 @@ public final class AIEngine {
         return null;
     }
 
-    private void recordSuccess(String provider, String model, long startTime) {
+    public void setActiveProvider(String provider, String model, long pingMs) {
         this.fallbackMode = false;
         this.activeProviderName = provider;
         this.activeModelName = model;
-        this.lastPingMs.set(System.currentTimeMillis() - startTime);
+        this.lastPingMs.set(pingMs);
+    }
+
+    private void recordSuccess(String provider, String model, long startTime) {
+        setActiveProvider(provider, model, System.currentTimeMillis() - startTime);
     }
 
     private String escapeJson(String input) {

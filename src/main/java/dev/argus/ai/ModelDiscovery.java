@@ -68,10 +68,14 @@ public final class ModelDiscovery {
                     .GET()
                     .build();
 
+            long start = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            long ping = System.currentTimeMillis() - start;
+
             if (response.statusCode() == 200 && response.body() != null) {
                 String elected = extractModelFromResponse(response.body(), preferredFallback);
                 electedModels.put(provider, elected);
+                plugin.getAiEngine().setActiveProvider(provider.getDisplayName(), elected, ping);
                 return;
             }
         } catch (Exception e) {
@@ -91,10 +95,14 @@ public final class ModelDiscovery {
                     .GET()
                     .build();
 
+            long start = System.currentTimeMillis();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            long ping = System.currentTimeMillis() - start;
+
             if (response.statusCode() == 200 && response.body() != null) {
                 if (response.body().contains("gemini-1.5-flash")) {
                     electedModels.put(AIProvider.GEMINI, "gemini-1.5-flash");
+                    plugin.getAiEngine().setActiveProvider(AIProvider.GEMINI.getDisplayName(), "gemini-1.5-flash", ping);
                     return;
                 }
             }
