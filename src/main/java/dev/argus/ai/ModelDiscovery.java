@@ -110,17 +110,29 @@ public final class ModelDiscovery {
         Pattern pattern = Pattern.compile("\"id\"\\s*:\\s*\"([^\"]+)\"");
         Matcher matcher = pattern.matcher(jsonBody);
 
-        String firstModel = null;
+        String bestChatCandidate = null;
         while (matcher.find()) {
             String id = matcher.group(1);
-            if (firstModel == null) {
-                firstModel = id;
+            String lower = id.toLowerCase();
+
+            // Skip audio, speech, moderation guardrails, and embedding models
+            if (lower.contains("whisper") || lower.contains("orpheus") || lower.contains("guard")
+                    || lower.contains("embed") || lower.contains("rerank") || lower.contains("speech")) {
+                continue;
             }
-            if (id.equalsIgnoreCase(preferredFallback) || id.contains("70b") || id.contains("flash")) {
+
+            // Direct high-priority match
+            if (id.equalsIgnoreCase(preferredFallback) || lower.contains("70b") || lower.contains("flash")) {
                 return id;
             }
+
+            // Record first valid chat completion LLM candidate
+            if (bestChatCandidate == null && (lower.contains("llama") || lower.contains("gpt-oss")
+                    || lower.contains("qwen") || lower.contains("mixtral") || lower.contains("allam"))) {
+                bestChatCandidate = id;
+            }
         }
-        return firstModel != null ? firstModel : preferredFallback;
+        return bestChatCandidate != null ? bestChatCandidate : preferredFallback;
     }
 
     public String getElectedModel(AIProvider provider) {
