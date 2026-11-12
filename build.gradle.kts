@@ -51,9 +51,8 @@ tasks.shadowJar {
     archiveClassifier.set("all")
     archiveBaseName.set("ArgusAC")
     
-    // Relocate shaded dependencies to prevent classpath conflicts
+    // Relocate shaded dependencies (NEVER relocate org.sqlite as JNI native bindings break)
     relocate("com.zaxxer.hikari", "dev.argus.libs.hikari")
-    relocate("org.sqlite", "dev.argus.libs.sqlite")
     relocate("net.dv8tion.jda", "dev.argus.libs.jda")
 }
 

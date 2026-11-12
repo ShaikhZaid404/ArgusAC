@@ -23,12 +23,16 @@ public final class DatabaseManager {
 
     public synchronized void initialize() {
         File dbFile = new File(plugin.getDataFolder(), "argus.db");
+        if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
+            dbFile.getParentFile().mkdirs();
+        }
+
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setPoolName("Argus-SQLite-Pool");
         hikariConfig.setDriverClassName("org.sqlite.JDBC");
-        hikariConfig.setJdbcUrl("jdbc:sqlite:" + dbFile.getAbsolutePath());
-        hikariConfig.setMaximumPoolSize(8);
-        hikariConfig.setMinimumIdle(2);
+        hikariConfig.setJdbcUrl("jdbc:sqlite:" + dbFile.getAbsolutePath() + "?busy_timeout=5000&journal_mode=WAL");
+        hikariConfig.setMaximumPoolSize(2);
+        hikariConfig.setMinimumIdle(1);
         hikariConfig.setIdleTimeout(30000);
         hikariConfig.setMaxLifetime(60000);
         hikariConfig.setConnectionTimeout(10000);
