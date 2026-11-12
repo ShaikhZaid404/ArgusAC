@@ -44,7 +44,7 @@ public final class PlayerConnectionListener implements Listener {
         if (result instanceof AltEvaluationResult.Rejected rejected) {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, rejected.disconnectMessage());
             if (plugin.getDiscordManager() != null) {
-                plugin.getDiscordManager().sendAltAudit(rejected.primaryName(), name, "BLOCKED_ALT_CONNECTION");
+                plugin.getDiscordManager().sendAltAudit(rejected.primaryAccount(), name, "BLOCKED_ALT_CONNECTION");
             }
         }
     }
